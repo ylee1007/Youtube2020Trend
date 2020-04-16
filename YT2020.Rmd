@@ -1,0 +1,188 @@
+---
+title: "YT2020"
+author: "youna(anna) kim"
+date: "April 15, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(utils)
+library(dplyr)
+
+FoxData <- read.csv2("C:/Users/anna9/Desktop/STAT 479/Project/list_mode_export_fox.csv", header = TRUE, sep=",")
+
+Foxdf <- as.data.frame(FoxData)
+Fox <- Foxdf %>% select("Title", "Address", "Meta.Description.1", "Meta.Keyword.1" ,"Hash")
+Fox$Title <- as.character(Fox$Title)
+Fox$Address <- as.character(Fox$Address)
+Fox$Meta.Description.1 <- as.character(Fox$Meta.Description.1)
+Fox$Meta.Keyword.1 <- as.character(Fox$Meta.Keyword.1)
+Fox$Hash <- as.character(Fox$Hash)
+
+str(Fox)
+
+
+```
+
+```{r}
+library(quanteda)
+library(stringr)
+TitleWord <-word(Fox$Title)
+
+Title_Token <- tokens(Fox$Title, what = "word", remove_numbers = TRUE, remove_punct = TRUE, remove_symbols = TRUE, remove_hyphens = TRUE)
+
+#trainTT <- tokens_tolower(Title_Token)
+#trainTT <- tokens_select(trainTT, stopwords(), selection = "remove")
+#trainTT <- tokens_wordstem(trainTT, language="english")
+# trainTT <- tokens_ngrams(trainTT, n = 1:2)
+
+trainTT <- Title_Token %>% tokens_tolower() %>% tokens_select(stopwords(), selection = "remove") %>% tokens_wordstem(language="english")
+
+
+trainTT_dfm <- dfm(trainTT, tolower= FALSE)
+counts = topfeatures(trainTT_dfm, n = 1000, decreasing = TRUE, scheme = c("count", "docfreq"), group = NULL)
+top1000 <- names(counts)
+
+top1000_dfm <- dfm_select(trainTT_dfm, pattern = top1000)
+top1000_matrix <- as.matrix(top1000_dfm)
+dim(top1000_matrix)
+top1000_df <- as.data.frame(top1000_matrix)
+
+
+```
+
+
+```{r}
+
+barplot(counts[1:50])
+
+```
+
+
+K-means
+
+```{r}
+
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+
+
+```
+
+
+```{r}
+
+k <- kmeans(trainTT_dfm, centers = 5, nstart= 25)
+
+fviz_cluster(k, data = trainTT_dfm)
+
+```
+
+
+```{r}
+
+cost_df <- data.frame()
+
+# run kmeans for all clusters up to 50
+
+for(i in 1:15){
+  # run kmeans for each level of i
+  kmeans <- kmeans(x = trainTT_dfm, centers = i, iter.max = 15)
+  
+  #combine cluster number and cost together, write to df
+  cost_df <- rbind(cost_df, cbind(i, kmeans$tot.withinss))
+}
+
+
+names(cost_df) <- c("cluster", "cost")
+
+
+plot(cost_df$cluster, cost_df$cost, type = "b", pch = 19, frame = FALSE, xlab = "Number of clusters K", ylab = "Cost")
+
+```
+
+The plot above is a technique known informally as the 'elbow method', where we should stop adding clusters. Based on the above graph, the elbow is 3 clusters, which is one of the optimal number of clusters to cluster data.
+
+```{r}
+#df <- convert(trainTT_dfm, to = "data.frame")
+
+#fviz_nbclust(df, kmeans, method = "silhouette")
+
+```
+
+
+```{r}
+
+title_kmeans <- kmeans(x = trainTT_dfm, centers = 3, nstart = 25)
+# adding nstart = 25 will generate 25 initial configurations.
+
+fviz_cluster(title_kmeans, data = trainTT_dfm)
+
+
+```
+
+
+
+
+```{r}
+
+# Fox$Meta.Keyword.1
+KeyWord_Token <- tokens(Fox$Meta.Keyword.1, what = "word", remove_numbers = TRUE, remove_punct = TRUE, remove_symbols = TRUE, remove_hyphens = TRUE)
+
+
+
+trainKW <- KeyWord_Token %>% tokens_tolower() %>% tokens_select(stopwords(), selection = "remove") %>% tokens_wordstem(language="english")
+
+
+trainKW_dfm <- dfm(trainKW, tolower= FALSE)
+
+```
+
+
+
+```{r}
+
+cost_df2 <- data.frame()
+
+# run kmeans for all clusters up to 50
+
+for(i in 1:15){
+  # run kmeans for each level of i
+  kmeans <- kmeans(x = trainKW_dfm, centers = i, iter.max = 15)
+  
+  #combine cluster number and cost together, write to df
+  cost_df2 <- rbind(cost_df2, cbind(i, kmeans$tot.withinss))
+}
+
+
+names(cost_df2) <- c("cluster", "cost")
+
+
+plot(cost_df2$cluster, cost_df2$cost, type = "b", pch = 19, frame = FALSE, xlab = "Number of clusters K", ylab = "Cost")
+
+```
+No elbow.....
+
+
+
+
+```{r}
+
+KW_kmeans <- kmeans(x = trainKW_dfm, centers = 5)
+# adding nstart = 25 will generate 25 initial configurations.
+
+
+fviz_cluster(KW_kmeans, data = trainKW_dfm)
+
+
+```
+
+
+
+
