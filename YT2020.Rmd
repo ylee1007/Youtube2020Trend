@@ -198,7 +198,9 @@ temp$cluster <- as.factor(KW_kmeans$cluster)
 show_cluster <- temp %>% select(document, cluster)
 
 c1 <- temp %>% filter(cluster == 1)
-c1.words <- c1 %>% select(-cluster) 
+
+write.csv(c1, "C:/Users/anna9/Desktop/STAT 479/Project/Youtube2020Trend/cluster1.csv", row.names = FALSE)
+
 ```
 
 
