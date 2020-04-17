@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(utils)
 library(dplyr)
 
-FoxData <- read.csv2("C:/Users/anna9/Desktop/STAT 479/Project/list_mode_export_fox.csv", header = TRUE, sep=",")
+FoxData <- read.csv2("C:/Users/anna9/Desktop/STAT 479/Project/Youtube2020Trend/list_mode_export_fox.csv", header = TRUE, sep=",")
 
 Foxdf <- as.data.frame(FoxData)
 Fox <- Foxdf %>% select("Title", "Address", "Meta.Description.1", "Meta.Keyword.1" ,"Hash")
@@ -68,9 +68,9 @@ K-means
 
 ```{r}
 
-library(tidyverse)  # data manipulation
-library(cluster)    # clustering algorithms
-library(factoextra) # clustering algorithms & visualization
+#library('tidyverse')  # data manipulation
+library('cluster')    # clustering algorithms
+library('factoextra') # clustering algorithms & visualization
 
 
 ```
@@ -142,6 +142,7 @@ trainKW <- KeyWord_Token %>% tokens_tolower() %>% tokens_select(stopwords(), sel
 
 trainKW_dfm <- dfm(trainKW, tolower= FALSE)
 
+
 ```
 
 
@@ -167,7 +168,7 @@ names(cost_df2) <- c("cluster", "cost")
 plot(cost_df2$cluster, cost_df2$cost, type = "b", pch = 19, frame = FALSE, xlab = "Number of clusters K", ylab = "Cost")
 
 ```
-No elbow.....
+No elbow.....probablly 6?
 
 
 
@@ -181,6 +182,23 @@ KW_kmeans <- kmeans(x = trainKW_dfm, centers = 5)
 fviz_cluster(KW_kmeans, data = trainKW_dfm)
 
 
+```
+
+```{r}
+
+str(KW_kmeans)
+# cluster: vector of integers 1:k indicating the cluster to which each word is allocated
+
+KW_kmeans$cluster[KW_kmeans$cluster == 1]
+
+
+temp <- convert(trainKW_dfm, to = "data.frame")
+temp$cluster <- as.factor(KW_kmeans$cluster)
+
+show_cluster <- temp %>% select(document, cluster)
+
+c1 <- temp %>% filter(cluster == 1)
+c1.words <- c1 %>% select(-cluster) 
 ```
 
 
