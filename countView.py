@@ -9,7 +9,8 @@ import os
 #print(os.listdir(os.getcwd()))
 
 ## read the data
-df = pd.read_excel (r'list_mode_export_fox.xlsx')
+#df = pd.read_excel (r'list_mode_export_fox.xlsx')
+df = pd.read_excel (r'list_mode_export_msnbc_final.xlsx')
 numView50 = []
 
 #print (df)
