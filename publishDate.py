@@ -9,10 +9,9 @@ import os
 # print(os.listdir(os.getcwd()))
 
 df = pd.read_excel(r'list_mode_export_fox.xlsx')
+numDate = []
 
-numView67 = []
-
-for x in range(2000, 2100):
+for x in range(2800, 2880):
     url = df["Original Url"][x]
 
     content = requests.get(url)
@@ -21,9 +20,9 @@ for x in range(2000, 2100):
     # date when the video was published
     temp_publishDate = soup.find("strong", attrs={"class": "watch-time-text"}).text
     publishDate = temp_publishDate[5:]
-    numView67.append(publishDate)
+    numDate.append(publishDate)
 
-print(numView67)
+print(numDate)
 
 
 
