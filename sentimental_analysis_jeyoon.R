@@ -9,7 +9,6 @@ library(sentimentr)
 msnbc<-read_excel("list_mode_export_msnbc_final.xlsx")
 
 msnbc_title <-as.character(msnbc$Title)
-msnbc_title <- as.character(msnbc$ï..Title)
 msnbc_title <- tibble(line= 1:2759, text=msnbc_title)
 msnbc_title <- as.data.frame(msnbc_title)
 
