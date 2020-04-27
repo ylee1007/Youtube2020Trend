@@ -1,0 +1,336 @@
+---
+title: "Month_Title_Analysis"
+author: "Jane Jang"
+date: "4/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#required libraries
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+library(tidytext)
+```
+
+#fox data load
+```{r}
+fox <- read_excel("fox_data_removedduplicates.xlsx")
+fox <- fox%>%
+  select("Title", "Date")
+```
+
+#classifying fox data by month
+````{r}
+Apr_fox <-fox%>%
+  filter(str_detect(Date, "2020. 4."))
+
+Mar_fox <- fox%>%
+  filter(str_detect(Date, "2020. 3. "))
+
+Feb_fox <- fox%>%
+  filter(str_detect(Date, "2020. 2. "))
+
+Jan_fox <- fox%>%
+  filter(str_detect(Date, "2020. 1. "))
+```
+
+#Fox-January
+```{r}
+Jan_fox_title <-as.character(Jan_fox$Title)
+Jan_fox_title <- tibble(line= 1:460, text=Jan_fox_title)
+
+data("stop_words")
+
+Jan_fox_words <- Jan_fox_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Jan_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Jan_fox_words$word ,ignore.case = TRUE)
+Jan_fox_words$word <-gsub("[[:punct:]]", "", Jan_fox_words$word )
+Jan_fox_words$word<-gsub("fox", "", Jan_fox_words$word)
+Jan_fox_words$word<-gsub("trumps", "trump", Jan_fox_words$word, ignore.case=TRUE)
+Jan_fox_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>21)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+
+```
+
+#Fox-Febuary
+```{r}
+Feb_fox_title <-as.character(Feb_fox$Title)
+Feb_fox_title <- tibble(line= 1:468, text=Feb_fox_title)
+
+
+Feb_fox_words <- Feb_fox_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Feb_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Feb_fox_words$word ,ignore.case = TRUE)
+Feb_fox_words$word <-gsub("[[:punct:]]", "", Feb_fox_words$word )
+Feb_fox_words$word<-gsub("fox", "", Feb_fox_words$word)
+Feb_fox_words$word<-gsub("trumps", "trump", Feb_fox_words$word, ignore.case=TRUE)
+Feb_fox_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>21)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#Fox-March
+```{r}
+Mar_fox_title <-as.character(Mar_fox$Title)
+Mar_fox_title <- tibble(line= 1:582, text=Mar_fox_title)
+
+
+Mar_fox_words <- Mar_fox_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Mar_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Mar_fox_words$word ,ignore.case = TRUE)
+Mar_fox_words$word <-gsub("[[:punct:]]", "", Mar_fox_words$word )
+Mar_fox_words$word<-gsub("fox", "", Mar_fox_words$word)
+Mar_fox_words$word<-gsub("trumps", "trump", Mar_fox_words$word, ignore.case=TRUE)
+Mar_fox_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>26)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#Fox-April
+```{r}
+Apr_fox_title <-as.character(Apr_fox$Title)
+Apr_fox_title <- tibble(line= 1:254, text=Apr_fox_title)
+
+
+Apr_fox_words <- Apr_fox_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Apr_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Apr_fox_words$word ,ignore.case = TRUE)
+Apr_fox_words$word <-gsub("[[:punct:]]", "", Apr_fox_words$word )
+#Apr_fox_words$word <-gsub('[[:digit:]]+',"", Apr_fox_words$word )
+Apr_fox_words$word<-gsub("fox", "", Apr_fox_words$word)
+Apr_fox_words$word<-gsub("trumps", "trump", Apr_fox_words$word, ignore.case=TRUE)
+Apr_fox_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>13)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC DATA LOAD
+```{R}
+msnbc <- read_excel("msnbc_data.xlsx")
+msnbc <- msnbc%>%
+  select("TitleRemoved","Date" )
+```
+
+#Classifying msnbc data by month
+```{r}
+Apr_msnbc <-msnbc%>%
+  filter(str_detect(Date, "2020. 4."))
+
+Mar_msnbc <- msnbc%>%
+  filter(str_detect(Date, "2020. 3. "))
+
+Feb_msnbc <- msnbc%>%
+  filter(str_detect(Date, "2020. 2. "))
+
+Jan_msnbc <- msnbc%>%
+  filter(str_detect(Date, "2020. 1. "))
+```
+
+#MSNBC-JAN
+```{R}
+Jan_msnbc_title <-as.character(Jan_msnbc$TitleRemoved)
+Jan_msnbc_title <- tibble(line= 1:666, text=Jan_msnbc_title)
+
+data("stop_words")
+
+Jan_msnbc_words <- Jan_msnbc_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Jan_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Jan_msnbc_words$word ,ignore.case = TRUE)
+Jan_msnbc_words$word <-gsub("[[:punct:]]", "", Jan_msnbc_words$word )
+Jan_msnbc_words$word<-gsub("msnbc", "", Jan_msnbc_words$word)
+Jan_msnbc_words$word<-gsub("trumps", "trump", Jan_msnbc_words$word, ignore.case=TRUE)
+Jan_msnbc_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>40)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC-FEB
+```{R}
+#Feb
+Feb_msnbc_title <-as.character(Feb_msnbc$TitleRemoved)
+Feb_msnbc_title <- tibble(line= 1:718, text=Feb_msnbc_title)
+
+
+Feb_msnbc_words <- Feb_msnbc_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Feb_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Feb_msnbc_words$word ,ignore.case = TRUE)
+Feb_msnbc_words$word <-gsub("[[:punct:]]", "", Feb_msnbc_words$word )
+Feb_msnbc_words$word<-gsub("msnbc", "", Feb_msnbc_words$word)
+Feb_msnbc_words$word<-gsub("trumps", "trump", Feb_msnbc_words$word, ignore.case=TRUE)
+Feb_msnbc_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>37)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC-MAR
+```{R}
+Mar_msnbc_title <-as.character(Mar_msnbc$TitleRemoved)
+Mar_msnbc_title <- tibble(line= 1:936, text=Mar_msnbc_title)
+
+
+Mar_msnbc_words <- Mar_msnbc_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Mar_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Mar_msnbc_words$word ,ignore.case = TRUE)
+Mar_msnbc_words$word <-gsub("[[:punct:]]", "", Mar_msnbc_words$word )
+Mar_msnbc_words$word<-gsub("msnbc", "", Mar_msnbc_words$word)
+Mar_msnbc_words$word<-gsub("trumps", "trump", Mar_msnbc_words$word, ignore.case=TRUE)
+Mar_msnbc_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>35)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC-APRIL
+```{R}
+Apr_msnbc_title <-as.character(Apr_msnbc$TitleRemoved)
+Apr_msnbc_title <- tibble(line= 1:439, text=Apr_msnbc_title)
+
+
+Apr_msnbc_words <- Apr_msnbc_title %>%
+  unnest_tokens(word, text)%>%
+  anti_join(stop_words)
+
+Apr_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Apr_msnbc_words$word ,ignore.case = TRUE)
+Apr_msnbc_words$word <-gsub("[[:punct:]]", "", Apr_msnbc_words$word )
+Apr_msnbc_words$word<-gsub("msnbc", "", Apr_msnbc_words$word)
+#Apr_words$word <-gsub('[[:digit:]]',"", Apr_words$word )
+Apr_msnbc_words$word<-gsub("trumps", "trump", Apr_msnbc_words$word, ignore.case=TRUE)
+Apr_msnbc_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>20)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC+FOX MONTHLY TITLE WORD ANALYSIS
+#MSNBC+FOX -JAN
+```{R}
+Jan_together_words <-Jan_fox_words %>%
+  full_join(Jan_msnbc_words)
+
+Jan_together_words%>%
+  count(word, sort=TRUE)%>%
+  filter(n>52)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC+FOX-FEB
+```{R}
+#Feb
+Feb_together_words <-Feb_fox_words %>%
+  full_join(Feb_msnbc_words)
+
+Feb_together_words%>%
+  count(word, sort=TRUE)%>%
+  filter(n>46)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC+FOX-MARCH
+```{R}
+#Mar
+Mar_together_words <-Mar_fox_words %>%
+  full_join(Mar_msnbc_words)
+
+Mar_together_words%>%
+  count(word, sort=TRUE)%>%
+  filter(n>50)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
+
+#MSNBC+FOX -APRIL
+```{R}
+Apr_together_words <-Apr_fox_words %>%
+  full_join(Apr_msnbc_words)
+
+Apr_together_words%>%
+  count(word, sort=TRUE)%>%
+  filter(n>25)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+```
