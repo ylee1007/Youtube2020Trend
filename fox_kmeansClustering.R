@@ -109,18 +109,19 @@ fox_tf_idf <- TFIDF(fox_title$text)
 
 # 2. [Cosine] :
 # distance between two vectors
-Cosine <- function(x, y) {
-  similarity <- sum(x * y) / ( sqrt( sum(y ^ 2) ) * sqrt( sum(x ^ 2) ) )
+#Cosine <- function(x, y) {
+#  similarity <- sum(x * y) / ( sqrt( sum(y ^ 2) ) * sqrt( sum(x ^ 2) ) )
   
   # given the cosine value, use acos to convert back to degrees
   # acos returns the radian, multiply it by 180 and divide by pi to obtain degrees
-  return( acos(similarity) * 180 / pi )
-}
+#  return( acos(similarity) * 180 / pi )
+#}
 
 # 3. calculate pair-wise distance matrix 
-pr_DB$set_entry( FUN = Cosine , names = c("Cosine"))
-d1 <- dist(fox_tf_idf, method = "Cosine")
-pr_DB$delete_entry("Cos")
+#pr_DB$set_entry( FUN = Cosine , names = c("Cosine"))
+#d1 <- dist(fox_tf_idf, method = "Cosine")
+#pr_DB$delete_entry("Cos")
+d1 <- dist(fox_tf_idf, method = "cosine")
 
 # 4. heirachical clustering 
 cluster1 <- hclust(d1, method = "ward.D")

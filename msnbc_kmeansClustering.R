@@ -118,19 +118,21 @@ msnbc_tf_idf <- TFIDF(msnbc_title$text)
 
 # 2. [Cosine] :
 # distance between two vectors
-Cosine <- function(x, y) {
-  similarity <- sum(x * y) / ( sqrt( sum(y ^ 2) ) * sqrt( sum(x ^ 2) ) )
+#Cosine <- function(x, y) {
+#  similarity <- sum(x * y) / ( sqrt( sum(y ^ 2) ) * sqrt( sum(x ^ 2) ) )
   
   # given the cosine value, use acos to convert back to degrees
   # acos returns the radian, multiply it by 180 and divide by pi to obtain degrees
-  return( acos(similarity) * 180 / pi )
-}
-pr_DB$delete_entry("Cosine")
+#  return( acos(similarity) * 180 / pi )
+#}
+# pr_DB$delete_entry("Cosine")
 
 # 3. calculate pair-wise distance matrix 
-pr_DB$set_entry( FUN = Cosine , names = c("Cosine"))
-d1 <- dist(msnbc_tf_idf, method = "Cosine")
-pr_DB$delete_entry("Cosine")
+# pr_DB$set_entry( FUN = Cosine , names = c("Cosine"))
+# d1 <- dist(msnbc_tf_idf, method = "Cosine")
+# pr_DB$delete_entry("Cosine")
+
+d1 <- dist( msnbc_tf_idf, method = "cosine" )
 
 # 4. heirachical clustering 
 msnbc.cluster1 <- hclust(d1, method = "ward.D")
@@ -160,3 +162,4 @@ wordcloud(msnbc.cluster.2, max.words = 100, min.freq = 3, random.order = FALSE, 
 wordcloud(msnbc.cluster.3, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 wordcloud(msnbc.cluster.4, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 wordcloud(msnbc.cluster.5, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+
