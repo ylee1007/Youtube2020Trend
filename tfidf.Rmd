@@ -1,0 +1,170 @@
+---
+title: "tfidf"
+author: "youna(anna) kim"
+date: "April 26, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(dplyr)
+library(stringr)
+library(tidytext)
+library(ggplot2)
+library(tidyverse)
+library(tidyr)
+library(readxl)
+library(sentimentr)
+library(rlang)
+
+library('cluster')    # clustering algorithms
+library('factoextra') # clustering algorithms & visualization
+library('quanteda')
+
+```
+# FOX
+
+Get title from excel
+```{r}
+
+fox <- read_excel("fox_data_removedduplicates.xlsx")
+docFox <-  fox[,1]
+docFox$Title <-gsub("[[:punct:]]", "", docFox$Title)
+docFox$Title <-gsub("fox", "", docFox$Title, ignore.case = TRUE) #dropping fox
+docFox$Title <-gsub("[^0-9A-Za-z///' ]","", docFox$Title,ignore.case = TRUE)
+docFox$Title <-gsub("Trumps", "Trump", docFox$Title, ignore.case = TRUE)
+
+
+fox_title <- as.character(docFox$Title)
+fox_title <- tibble(line= 1:1764, text=fox_title)
+fox_title <- as.data.frame(fox_title)
+
+```
+
+word frequency
+```{r}
+
+
+fox_words <- fox_title %>%
+  unnest_tokens(word, text)
+
+fox_words <- fox_words%>%
+  anti_join(stop_words)
+
+fox_words %>%
+  count(word, sort=TRUE)
+
+
+fox_words %>%
+  count(word, sort=TRUE)%>%
+  filter(n>50)%>%
+  mutate(word=reorder(word, n))%>%
+  ggplot(aes(word, n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n),hjust=-0.3)
+
+fox_bigrams <- fox_title%>%
+  unnest_tokens(bigram, text, token="ngrams", n=2)
+
+fox_bigrams %>%
+  count(bigram, sort=TRUE)%>%
+  separate(bigram, c("word1", "word2"), sep= " ")%>%
+  filter(!word1 %in% stop_words$word)%>%
+  filter(!word2 %in% stop_words$word)%>%
+  unite(bigram, word1,word2, sep = " ")%>%
+  filter(n>15)%>%
+  mutate(word=reorder(bigram,n))%>%
+  ggplot(aes(x=word, y=n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n), hjust=-0.3)
+
+```
+
+tf-idf
+```{r}
+
+library(quanteda)
+library(caret)
+
+TF = function(rownum){
+  tf = rownum/sum(rownum)
+  return(tf)
+}
+IDF = function(docnum){
+  idf = log10((length(docnum))/(length(which(docnum > 0))))
+  return(idf)
+}
+
+TF_IDF = function(tf,idf){
+  tfidf = tf*idf
+  return(tfidf)
+}
+
+```
+
+Tokenize words and select top 1000 frequent words
+```{r}
+# tokenize
+fox_title_token <- tokens(fox_title$text, what = "word", remove_numbers = TRUE, remove_punct = TRUE, remove_symbols = TRUE, remove_hyphens = TRUE)
+
+# clean tokens
+fox_title_train <- fox_title_token %>% tokens_tolower() %>% tokens_select(stopwords(), selection = "remove") %>% tokens_wordstem(language="english")
+
+fox_title_train <- tokens_ngrams(fox_title_train, n = 1:2) #phrase
+
+fox_title_train_dfm <- dfm(fox_title_train, tolower = FALSE)
+
+count1000<- topfeatures(fox_title_train_dfm, n = 1000, decreasing = TRUE, scheme = c("count", "docfreq"), group = NULL)
+
+fox_title_top1000 <- names(count1000)
+
+fox_title_top1000_dfm <- dfm_select(fox_title_train_dfm, pattern = fox_title_top1000)
+fox_title_top1000_matrix <- as.matrix(fox_title_top1000_dfm)
+fox_title_top1000_df <- as.data.frame(fox_title_top1000_matrix)
+dim(fox_title_top1000_matrix)
+```
+
+apply tfidf
+```{r}
+
+fox.title_train_tf <- apply(fox_title_top1000_matrix, 1, TF)
+fox.title_train_idf <- apply(fox_title_top1000_matrix, 2, IDF)
+fox.title_train_tfidf <- apply(fox.title_train_tf, 2, TF_IDF, idf = fox.title_train_idf)
+fox.train_token_df <- as.data.frame(t(fox.title_train_tfidf))
+dim(fox.train_token_df)
+
+```
+
+
+```{r}
+
+title.model_df <- fox.train_token_df
+
+title.model_df$view <- fox$View
+title.model_df$lognWord <- log(fox$`Title 1 Length`)
+
+title.lm <- lm(view ~. , data = title.model_df)
+anova(title.lm)
+summary(title.lm)
+
+```
+
+k-means cluster
+```{r}
+
+#fox.title.kmeans <- kmeans(x = fox.train_token_df, centers = 4)
+
+#fviz_cluster(fox.title.kmeans, data = fox.train_token_df)
+
+```
+
+
+
