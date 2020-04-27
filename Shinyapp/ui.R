@@ -55,23 +55,25 @@ body <- dashboardBody(
                ),
                selectInput("month", "Select Month:",
                            choices = c(
-                             "January" = 1,
-                             "Feburary" = 2,
-                             "March" = 3,
-                             "April" = 4
+                             "January" = "Jan",
+                             "Feburary" = "Feb",
+                             "March" = "Mar",
+                             "April" = "Apr"
                            ),
-                           selected = "3"
+                           selected = "Jan"
                ),
                p(
                  class = "text-muted",
                  paste("Note: April data includes video from 4/1 to 4/12.")
-               ),
-               actionButton("go", "Show Graph", icon("chart-bar"))
+               )
+               #actionButton("go", "Show Graph", icon("chart-bar"))
            )
     ),
     column(width = 9,
-           box(width = NULL, solidHeader = TRUE, height = 300
+           box(width = NULL, solidHeader = TRUE, height = 420,
                # TODO put graph
+               #textOutput("selected_var"),
+               plotOutput("monthPlot")
            )
     )
   ),
