@@ -268,15 +268,15 @@ cluster7Title <- value[[7]][[1]]
 
 wordcloud(cluster7Title, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 
-cluster8Title <- value[[8]][[1]]
+#cluster8Title <- value[[8]][[1]]
 
-wordcloud(cluster8Title, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+#wordcloud(cluster8Title, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 
 ##############################
 
 
 c1_title <-as.character(value[[6]][[1]])
-c1_title <- tibble(line= 1:274, text=c1_title)
+c1_title <- tibble(line= 1:193, text=c1_title)
 c1_title <- as.data.frame(c1_title)
 
 data("stop_words")
@@ -315,3 +315,9 @@ c6_view <- mean(value[[6]][["View"]])
 c_viewTable <- as.table(c(c1_view,c2_view,c3_view,c4_view,c5_view,c6_view))
 names(c_viewTable) <- c("c1","c2","c3","c4","c5","c6")
 plot(c_viewTable)
+
+
+
+
+
+

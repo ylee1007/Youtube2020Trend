@@ -156,15 +156,3 @@ anova(title.lm)
 summary(title.lm)
 
 ```
-
-k-means cluster
-```{r}
-
-#fox.title.kmeans <- kmeans(x = fox.train_token_df, centers = 4)
-
-#fviz_cluster(fox.title.kmeans, data = fox.train_token_df)
-
-```
-
-
-
