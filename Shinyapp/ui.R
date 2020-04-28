@@ -16,23 +16,23 @@ body <- dashboardBody(
                            ),
                            selected = "Fox"
                ),
-               selectInput("numK", "Select number of K:",
-                           choices = c(
-                             "2" = 2,
-                             "3" = 3,
-                             "4" = 4,
-                             "5" = 5,
-                             "6" = 6,
-                             "7" = 7,
-                             "8" = 8
-                           ),
-                           selected = "5"
-               ),
+               #selectInput("numK", "Select number of K:",
+              #             choices = c(
+              #               "2" = 2,
+              #               "3" = 3,
+              #               "4" = 4,
+              #               "5" = 5,
+              #               "6" = 6,
+              #               "7" = 7,
+              #               "8" = 8
+              #             ),
+              #             selected = "5"
+              # ),
                p(
                  class = "text-muted",
                  paste("Note: Data includes video from 1/1 to 4/12.")
-               ),
-               actionButton("go", "Show Graph", icon("chart-bar"))
+               )
+               #actionButton("go", "Show Graph", icon("chart-bar"))
                #submitButton("submit", "Show Graph", icon("chart-bar"))
            )
     ),
@@ -85,8 +85,8 @@ body <- dashboardBody(
   ),
   fluidRow(
     column(width = 5,
-           box(title = 'Model', width = NULL, status = "warning", solidHeader = TRUE, height = 300
-               # TODO put graph
+           box(title = 'Model', width = NULL, status = "warning", solidHeader = TRUE, height = 460,
+               plotOutput("model")
            )
     ),
     

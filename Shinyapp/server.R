@@ -10,6 +10,9 @@ library(proxy)
 #library(dplyr)
 library(wordcloud)
 
+library(glmnet)
+library(caret)
+
 ######################################### cluster analyze by month#######################################
 fox <- read_excel("../fox_data_removedduplicates.xlsx")
 fox <- fox%>%
@@ -226,6 +229,35 @@ msnbc_Trump_bigrams <-msnbc_title_TRUMP%>%
 msnbc_Trump_bigrams2 <- msnbc_Trump_bigrams[(grepl("trump",msnbc_Trump_bigrams$bigram)),]
 
 ######################################################################################################
+##model
+fox_msnbc_matrix <- read.csv("../fox_msnbc_matrix_revised.csv")
+
+summary(fox_msnbc_matrix$View)
+#plot(density(fox_msnbc_matrix$View))
+#hist(fox_msnbc_matrix$View, breaks=100, col="red")
+fox_msnbc_matrix$view.logic <- ifelse(fox_msnbc_matrix$View >= 250000, "large", "small")
+fox_msnbc_matrix <- fox_msnbc_matrix[,-1]
+#msnbc_matrix <- msnbc_matrix[,-2]
+
+
+#preparing the data
+set.seed(12345)
+training.samples <- fox_msnbc_matrix$view.logic%>%
+  createDataPartition(p=0.8, list=FALSE )
+train.data <- fox_msnbc_matrix[training.samples,]
+test.data <- fox_msnbc_matrix[-training.samples,]
+
+
+# Dumy code categorical predictor variables
+x <- model.matrix(view.logic~., train.data, na.omit=TRUE)[,-1]
+# Convert the outcome (class) to a numerical variable
+y <- ifelse(train.data$view.logic =="large", 1, 0)
+
+library(glmnet)
+# Find the best lambda using cross-validation
+set.seed(123) 
+cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "binomial")
+######################################################################################################
 server <- function(input, output) {
   output$selected_var <- renderText({ # test ouput code
     paste("Your var name is ", paste0(input$month, "_fox_words"))
@@ -328,5 +360,8 @@ server <- function(input, output) {
       xlab(NULL)+
       coord_flip()+
       geom_text(aes(label=n), hjust=-0.3)
+  })
+  output$model <- renderPlot({ 
+    plot(cv.lasso)
   })
 }
