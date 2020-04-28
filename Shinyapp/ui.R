@@ -2,7 +2,7 @@ library(shinydashboard)
 library(ggvis)
 
 header <- dashboardHeader(
-  title = "2020 Youtube Trend"
+  title = "2020 Youtube News Trend", titleWidth = 300
 )
 
 body <- dashboardBody(
