@@ -36,11 +36,43 @@ body <- dashboardBody(
                #submitButton("submit", "Show Graph", icon("chart-bar"))
            )
     ),
-    column(width = 9,
-           box(width = NULL, solidHeader = TRUE,
+    column(9,
+           fluidRow(
+    column(width = 7,
+           box(width = NULL, solidHeader = TRUE
                # TODO put graph
-               ggvisOutput("plot1"), height = 300
+              # plotOutput("overallPlot")
            )
+    ),
+    column(width = 5,
+           box(width = NULL, solidHeader = TRUE
+               # TODO put graph
+               # plotOutput("overallPlot")
+           ),
+           box(width = NULL, solidHeader = TRUE
+               # TODO put graph
+               # plotOutput("overallPlot")
+           )
+    )),
+    fluidRow(
+      column(width = 4,
+             box(width = NULL, solidHeader = TRUE
+                 # TODO put graph
+                 # plotOutput("overallPlot")
+             )
+      ),
+      column(width = 4,
+             box(width = NULL, solidHeader = TRUE
+                 # TODO put graph
+                 # plotOutput("overallPlot")
+             )
+      ),
+      column(width = 4,
+             box(width = NULL, solidHeader = TRUE
+                 # TODO put graph
+                 # plotOutput("overallPlot")
+             )
+      ))
     )
   ),
   fluidRow(
