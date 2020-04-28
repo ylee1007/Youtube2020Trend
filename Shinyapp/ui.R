@@ -39,38 +39,32 @@ body <- dashboardBody(
     column(9,
            fluidRow(
     column(width = 7,
-           box(width = NULL, solidHeader = TRUE
+           box(width = NULL, solidHeader = TRUE,
                # TODO put graph
-              # plotOutput("overallPlot")
+              plotOutput("overallPlot1")
            )
     ),
     column(width = 5,
-           box(width = NULL, solidHeader = TRUE
+           box(width = NULL, solidHeader = TRUE, height = 200,
                # TODO put graph
-               # plotOutput("overallPlot")
+               plotOutput("overallPlot2")
            ),
-           box(width = NULL, solidHeader = TRUE
+           box(width = NULL, solidHeader = TRUE, height = 200,
                # TODO put graph
-               # plotOutput("overallPlot")
+               plotOutput("overallPlot3")
            )
     )),
     fluidRow(
-      column(width = 4,
-             box(width = NULL, solidHeader = TRUE
+      column(width = 6,
+             box(width = NULL, solidHeader = TRUE,
                  # TODO put graph
-                 # plotOutput("overallPlot")
+                plotOutput("overallPlot4")
              )
       ),
-      column(width = 4,
-             box(width = NULL, solidHeader = TRUE
+      column(width = 6,
+             box(width = NULL, solidHeader = TRUE,
                  # TODO put graph
-                 # plotOutput("overallPlot")
-             )
-      ),
-      column(width = 4,
-             box(width = NULL, solidHeader = TRUE
-                 # TODO put graph
-                 # plotOutput("overallPlot")
+                 plotOutput("overallPlot5")
              )
       ))
     )

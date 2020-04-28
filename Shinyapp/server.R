@@ -4,6 +4,12 @@ library(tidyverse)
 library(tidyr)
 library(tidytext)
 
+# libraries for kmeans 
+library(tm)
+library(proxy)
+#library(dplyr)
+library(wordcloud)
+
 ######################################### cluster analyze by month#######################################
 fox <- read_excel("../fox_data_removedduplicates.xlsx")
 fox <- fox%>%
@@ -58,7 +64,7 @@ Apr_fox_words$word <-gsub("[[:punct:]]", "", Apr_fox_words$word )
 #Apr_fox_words$word <-gsub('[[:digit:]]+',"", Apr_fox_words$word )
 Apr_fox_words$word<-gsub("fox", "", Apr_fox_words$word)
 Apr_fox_words$word<-gsub("trumps", "trump", Apr_fox_words$word, ignore.case=TRUE)
-
+##############################################
 msnbc <- read_excel("../msnbc_data.xlsx")
 msnbc <- msnbc%>%
   select("TitleRemoved","Date" )
@@ -112,7 +118,98 @@ Apr_msnbc_words$word<-gsub("msnbc", "", Apr_msnbc_words$word)
 #Apr_words$word <-gsub('[[:digit:]]',"", Apr_words$word )
 Apr_msnbc_words$word<-gsub("trumps", "trump", Apr_msnbc_words$word, ignore.case=TRUE)
 ######################################################################################################
+######연아######
+fox <- read_excel("../fox_data_removedduplicates.xlsx")
+docFox <-  fox[,1]
+docFox$Title <-gsub("[[:punct:]]", "", docFox$Title)
+docFox$Title <-gsub("fox", "", docFox$Title, ignore.case = TRUE) #dropping fox
+docFox$Title <-gsub("[^0-9A-Za-z///' ]","", docFox$Title,ignore.case = TRUE)
+docFox$Title <-gsub("Trumps", "Trump", docFox$Title, ignore.case = TRUE)
 
+fox_title <- as.character(docFox$Title)
+fox_title <- tibble(line= 1:1764, text=fox_title)
+fox_title <- as.data.frame(fox_title)
+TFIDF <- function(vector) {
+  # tf 
+  news_corpus  <- Corpus( VectorSource(vector) )
+  control_list <- list(removePunctuation = TRUE, stopwords = TRUE, tolower = TRUE)
+  tf <- TermDocumentMatrix(news_corpus, control = control_list) %>% as.matrix()
+  
+  # idf
+  idf <- log( ncol(tf) / ( 1 + rowSums(tf != 0) ) ) %>% diag()
+  return( crossprod(tf, idf) )
+}
+
+# tf-idf matrix using news' title 
+fox_tf_idf <- TFIDF(fox_title$text)
+# 3. calculate pair-wise distance matrix 
+fox_d1 <- dist(fox_tf_idf, method = "cosine")
+
+# 4. heirachical clustering 
+fox_cluster1 <- hclust(fox_d1, method = "ward.D")
+
+# split into 10 clusters
+fox_groups1 <- cutree(fox_cluster1, 5)
+
+fox.cluster.1 <- fox_title$text[fox_groups1 == 1 ]
+#length(fox.cluster.1)
+fox.cluster.2 <- fox_title$text[fox_groups1 == 2 ]
+fox.cluster.3 <- fox_title$text[fox_groups1 == 3 ]
+fox.cluster.4 <- fox_title$text[fox_groups1 == 4 ]
+fox.cluster.5 <- fox_title$text[fox_groups1 == 5 ]
+
+# MSNBC data
+
+msnbcData<-read_excel("../msnbc_data.xlsx")
+doc <-  msnbcData[,5]
+doc$TitleRemoved <-gsub("[[:punct:]]", "", doc$TitleRemoved)
+doc$TitleRemoved <-gsub("Will", "", doc$TitleRemoved)
+doc$TitleRemoved <-gsub("[^0-9A-Za-z///' ]","", doc$TitleRemoved,ignore.case = TRUE)
+doc$TitleRemoved <-gsub("Trumps", "Trump", doc$TitleRemoved, ignore.case = TRUE)
+msnbcDf <- as.data.frame(msnbcData)
+msnbc <- msnbcDf %>% select("TitleRemoved")
+#msnbc$Title <- as.character(msnbc$TitleRemoved)
+#title<-msnbc$Title
+title2<-as.vector(msnbc)
+
+msnbc_title <- tibble(line = 1:2759, text = title2$TitleRemoved)
+msnbc_title <- as.data.frame(msnbc_title)
+
+TFIDF <- function(vector) {
+  # tf 
+  news_corpus  <- Corpus( VectorSource(vector) )
+  control_list <- list(removePunctuation = TRUE, stopwords = TRUE, tolower = TRUE)
+  tf <- TermDocumentMatrix(news_corpus, control = control_list) %>% as.matrix()
+  
+  # idf
+  idf <- log( ncol(tf) / ( 1 + rowSums(tf != 0) ) ) %>% diag()
+  return( crossprod(tf, idf) )
+}
+
+# tf-idf matrix using news' title 
+msnbc_tf_idf <- TFIDF(msnbc_title$text)
+
+# 2. [Cosine] :
+# distance between two vectors
+# 3. calculate pair-wise distance matrix 
+msnbc_d1 <- dist( msnbc_tf_idf, method = "cosine" )
+
+# 4. heirachical clustering 
+msnbc.cluster1 <- hclust(msnbc_d1, method = "ward.D")
+
+# split into 10 clusters
+msnbc.groups1 <- cutree(msnbc.cluster1, 5)
+
+# you can look at the distribution size of each cluster 
+# table(groups1)
+#msnbc
+msnbc.cluster.1 <- msnbc_title$text[msnbc.groups1 == 1 ]
+msnbc.cluster.2 <- msnbc_title$text[msnbc.groups1 == 2 ]
+msnbc.cluster.3 <- msnbc_title$text[msnbc.groups1 == 3 ]
+msnbc.cluster.4 <- msnbc_title$text[msnbc.groups1 == 4 ]
+msnbc.cluster.5 <- msnbc_title$text[msnbc.groups1 == 5 ]
+
+######################################################################################################
 server <- function(input, output) {
   output$selected_var <- renderText({ # test ouput code
     paste("Your var name is ", paste0(input$month, "_fox_words"))
@@ -151,4 +248,39 @@ server <- function(input, output) {
       coord_flip()+
       geom_text(aes(label=n),hjust=-0.3)
     })
+  output$overallPlot1 <- renderPlot({ 
+    cluster <- switch(input$pressName, 
+                       "Fox" = fox.cluster.1,
+                       "MSNBC" = msnbc.cluster.3
+    )
+    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  })
+  output$overallPlot2 <- renderPlot({ 
+    cluster <- switch(input$pressName, 
+                      "Fox" = fox.cluster.2,
+                      "MSNBC" = msnbc.cluster.1
+    )
+    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  })
+  output$overallPlot3 <- renderPlot({ 
+    cluster <- switch(input$pressName, 
+                      "Fox" = fox.cluster.3,
+                      "MSNBC" = msnbc.cluster.2
+    )
+    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  })
+  output$overallPlot4 <- renderPlot({ 
+    cluster <- switch(input$pressName, 
+                      "Fox" = fox.cluster.4,
+                      "MSNBC" = msnbc.cluster.4
+    )
+    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  })
+  output$overallPlot5 <- renderPlot({ 
+    cluster <- switch(input$pressName, 
+                      "Fox" = fox.cluster.5,
+                      "MSNBC" = msnbc.cluster.5
+    )
+    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  })
 }
