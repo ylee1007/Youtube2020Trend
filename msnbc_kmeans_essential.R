@@ -1,24 +1,8 @@
-
-#library(stringr)
-#library(tidytext)
-#library(ggplot2)
-#library(tidyverse)
-#library(tidyr)
-#library(sentimentr)
-#library(rlang)
-
-#library(tidytext)
-#library(qdap)
-
-
 library(readxl)
-
-
 # libraries for kmeans 
 library(tm)
 library(proxy)
 library(dplyr)
-
 library(wordcloud)
 
 
