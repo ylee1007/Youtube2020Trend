@@ -37,36 +37,16 @@ body <- dashboardBody(
            )
     ),
     column(9,
-           fluidRow(
-    column(width = 7,
-           box(width = NULL, solidHeader = TRUE,
-               # TODO put graph
-              plotOutput("overallPlot1")
+           tabBox(
+             title = "Cluster Graph", width = NULL,
+             # The id lets us use input$tabset1 on the server to find the current tab
+             id = "tabset1",
+             tabPanel("Cluster 1", plotOutput("overallPlot1")),
+             tabPanel("Cluster 2", plotOutput("overallPlot2")),
+             tabPanel("Cluster 3", plotOutput("overallPlot3")),
+             tabPanel("Cluster 4", plotOutput("overallPlot4")),
+             tabPanel("Cluster 5", plotOutput("overallPlot5"))
            )
-    ),
-    column(width = 5,
-           box(width = NULL, solidHeader = TRUE, height = 200,
-               # TODO put graph
-               plotOutput("overallPlot2")
-           ),
-           box(width = NULL, solidHeader = TRUE, height = 200,
-               # TODO put graph
-               plotOutput("overallPlot3")
-           )
-    )),
-    fluidRow(
-      column(width = 6,
-             box(width = NULL, solidHeader = TRUE,
-                 # TODO put graph
-                plotOutput("overallPlot4")
-             )
-      ),
-      column(width = 6,
-             box(width = NULL, solidHeader = TRUE,
-                 # TODO put graph
-                 plotOutput("overallPlot5")
-             )
-      ))
     )
   ),
   fluidRow(
@@ -109,9 +89,17 @@ body <- dashboardBody(
                # TODO put graph
            )
     ),
+    
     column(width = 7,
-           box(title = 'Fox vs. MSNBC bigram (Trump)', status = "warning", width = NULL, solidHeader = TRUE, height = 300
-               # TODO put graph
+           fluidRow(
+             column(width = 6,
+           box(title = 'Fox bigram (Trump)', status = "warning", width = NULL, solidHeader = TRUE, height = 460,
+               plotOutput("trumpFox")
+           )),
+           column(width = 6,
+                  box(title = 'MSNBC bigram (Trump)', status = "warning", width = NULL, solidHeader = TRUE, height = 460,
+                      plotOutput("trumpMsnbc")
+                  ))
            )
     )
   )

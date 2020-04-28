@@ -210,6 +210,22 @@ msnbc.cluster.4 <- msnbc_title$text[msnbc.groups1 == 4 ]
 msnbc.cluster.5 <- msnbc_title$text[msnbc.groups1 == 5 ]
 
 ######################################################################################################
+#Trump
+fox_title_TRUMP <- fox_title[(grepl("Trump",fox_title$text)),]
+
+fox_Trump_bigrams <- fox_title_TRUMP%>%
+  unnest_tokens(bigram, text, token="ngrams", n=2)
+
+fox_Trump_bigrams2 <- fox_Trump_bigrams[(grepl("trump",fox_Trump_bigrams$bigram)),]
+
+msnbc_title_TRUMP <- msnbc_title[(grepl("Trump",msnbc_title$text)),]
+
+msnbc_Trump_bigrams <-msnbc_title_TRUMP%>%
+  unnest_tokens(bigram, text, token="ngrams", n=2)
+
+msnbc_Trump_bigrams2 <- msnbc_Trump_bigrams[(grepl("trump",msnbc_Trump_bigrams$bigram)),]
+
+######################################################################################################
 server <- function(input, output) {
   output$selected_var <- renderText({ # test ouput code
     paste("Your var name is ", paste0(input$month, "_fox_words"))
@@ -282,5 +298,35 @@ server <- function(input, output) {
                       "MSNBC" = msnbc.cluster.5
     )
     wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  })
+  output$trumpFox <- renderPlot({ 
+    fox_Trump_bigrams2 %>%
+      count(bigram, sort=TRUE)%>%
+      separate(bigram, c("word1", "word2"), sep= " ")%>%
+      filter(!word1 %in% stop_words$word)%>%
+      filter(!word2 %in% stop_words$word)%>%
+      unite(bigram, word1,word2, sep = " ")%>%
+      filter(n>5)%>%
+      mutate(word=reorder(bigram,n))%>%
+      ggplot(aes(x=word, y=n))+
+      geom_col()+
+      xlab(NULL)+
+      coord_flip()+
+      geom_text(aes(label=n), hjust=-0.3)
+  })
+  output$trumpMsnbc <- renderPlot({ 
+    msnbc_Trump_bigrams2 %>%
+      count(bigram, sort=TRUE)%>%
+      separate(bigram, c("word1", "word2"), sep= " ")%>%
+      filter(!word1 %in% stop_words$word)%>%
+      filter(!word2 %in% stop_words$word)%>%
+      unite(bigram, word1,word2, sep = " ")%>%
+      filter(n>3)%>%
+      mutate(word=reorder(bigram,n))%>%
+      ggplot(aes(x=word, y=n))+
+      geom_col()+
+      xlab(NULL)+
+      coord_flip()+
+      geom_text(aes(label=n), hjust=-0.3)
   })
 }
