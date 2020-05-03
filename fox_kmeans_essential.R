@@ -4,6 +4,8 @@ library(tm)
 library(proxy)
 library(dplyr)
 library(wordcloud)
+library(tidyr)
+library(ggplot2)
 
 # FOX
 
