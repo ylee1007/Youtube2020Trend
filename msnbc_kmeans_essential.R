@@ -65,7 +65,7 @@ msnbc.cluster.3 <- msnbc_title$text[msnbc.groups1 == 3 ]
 msnbc.cluster.4 <- msnbc_title$text[msnbc.groups1 == 4 ]
 msnbc.cluster.5 <- msnbc_title$text[msnbc.groups1 == 5 ]
 
-
+msnbc.cluster.length <- c(length(msnbc.cluster.1), length(msnbc.cluster.2),length(msnbc.cluster.3),length(msnbc.cluster.4),length(msnbc.cluster.5))
 
 
 wordcloud(msnbc.cluster.1, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
@@ -74,3 +74,41 @@ wordcloud(msnbc.cluster.3, max.words = 100, min.freq = 3, random.order = FALSE, 
 wordcloud(msnbc.cluster.4, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 wordcloud(msnbc.cluster.5, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 
+
+
+
+#########cluster 2
+
+c2 <- msnbc.cluster.2
+c2_title <- as.character(c2)
+c2_title <- tibble(line= 1:msnbc.cluster.length[2], text=c1)
+c2_title <- as.data.frame(c1_title)
+
+
+msnbc_title_TRUMP <- msnbc_title[(grepl("Trump",msnbc_title$text)),]
+
+sent_Trump_msnbc <-sentiment_by(msnbc_title_TRUMP$text)
+mean(sent_Trump_msnbc$ave_sentiment)
+
+msnbc_title_TRUMP$text%>%
+  extract_sentiment_terms()
+
+
+msnbc_Trump_bigrams <-msnbc_title_TRUMP%>%
+  unnest_tokens(bigram, text, token="ngrams", n=2)
+
+msnbc_Trump_bigrams2 <- msnbc_Trump_bigrams[(grepl("trump",msnbc_Trump_bigrams$bigram)),]
+
+msnbc_Trump_bigrams2 %>%
+  count(bigram, sort=TRUE)%>%
+  separate(bigram, c("word1", "word2"), sep= " ")%>%
+  filter(!word1 %in% stop_words$word)%>%
+  filter(!word2 %in% stop_words$word)%>%
+  unite(bigram, word1,word2, sep = " ")%>%
+  filter(n>3)%>%
+  mutate(word=reorder(bigram,n))%>%
+  ggplot(aes(x=word, y=n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n), hjust=-0.3)
