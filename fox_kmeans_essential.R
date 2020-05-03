@@ -69,11 +69,6 @@ wordcloud(fox.cluster.5, max.words = 100, min.freq = 3, random.order = FALSE, ro
 # cluster 1
 
 c1 <- fox.cluster.1
-c1 <-gsub("[[:punct:]]", "", c1)
-c1 <-gsub("fox", "", c1, ignore.case = TRUE) #dropping fox
-c1 <-gsub("[^0-9A-Za-z///' ]","", c1,ignore.case = TRUE)
-c1 <-gsub("Trumps", "Trump", c1, ignore.case = TRUE)
-
 c1_title <- as.character(c1)
 c1_title <- tibble(line= 1:cluster.length[1], text=c1)
 c1_title <- as.data.frame(c1_title)
