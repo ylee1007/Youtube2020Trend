@@ -54,7 +54,8 @@ fox.cluster.2 <- fox_title$text[fox_groups1 == 2 ]
 fox.cluster.3 <- fox_title$text[fox_groups1 == 3 ]
 fox.cluster.4 <- fox_title$text[fox_groups1 == 4 ]
 fox.cluster.5 <- fox_title$text[fox_groups1 == 5 ]
-
+# length of each cluster
+cluster.length <- c(length(fox.cluster.1), length(fox.cluster.2), length(fox.cluster.3), length(fox.cluster.4), length(fox.cluster.5))
 
 # Graphs
 
@@ -63,4 +64,49 @@ wordcloud(fox.cluster.2, max.words = 100, min.freq = 3, random.order = FALSE, ro
 wordcloud(fox.cluster.3, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 wordcloud(fox.cluster.4, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
 wordcloud(fox.cluster.5, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+
+
+# cluster 1
+
+c1 <- fox.cluster.1
+c1 <-gsub("[[:punct:]]", "", c1)
+c1 <-gsub("fox", "", c1, ignore.case = TRUE) #dropping fox
+c1 <-gsub("[^0-9A-Za-z///' ]","", c1,ignore.case = TRUE)
+c1 <-gsub("Trumps", "Trump", c1, ignore.case = TRUE)
+
+c1_title <- as.character(c1)
+c1_title <- tibble(line= 1:cluster.length[1], text=c1)
+c1_title <- as.data.frame(c1_title)
+
+###
+library(sentimentr)
+c1_title_TRUMP <- c1_title[(grepl("Trump",c1_title$text)),]
+
+sent_Trump_c1 <-sentiment_by(c1_title_TRUMP$text)
+mean(sent_Trump_c1$ave_sentiment)
+
+c1_title_TRUMP$text%>%
+  extract_sentiment_terms()
+
+library(tidytext)
+c1_Trump_bigrams <- c1_title_TRUMP%>%
+  unnest_tokens(bigram, text, token="ngrams", n=2)
+
+c1_Trump_bigrams2 <- c1_Trump_bigrams[(grepl("trump",c1_Trump_bigrams$bigram)),]
+
+c1_Trump_bigrams2 %>%
+  count(bigram, sort=TRUE)%>%
+  separate(bigram, c("word1", "word2"), sep= " ")%>%
+  filter(!word1 %in% stop_words$word)%>%
+  filter(!word2 %in% stop_words$word)%>%
+  unite(bigram, word1,word2, sep = " ")%>%
+  filter(n>2)%>%
+  mutate(word=reorder(bigram,n))%>%
+  ggplot(aes(x=word, y=n))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  geom_text(aes(label=n), hjust=-0.3)
+
+
 
