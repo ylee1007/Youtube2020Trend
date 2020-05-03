@@ -81,25 +81,25 @@ wordcloud(msnbc.cluster.5, max.words = 100, min.freq = 3, random.order = FALSE, 
 
 c2 <- msnbc.cluster.2
 c2_title <- as.character(c2)
-c2_title <- tibble(line= 1:msnbc.cluster.length[2], text=c1)
-c2_title <- as.data.frame(c1_title)
+c2_title <- tibble(line= 1:msnbc.cluster.length[2], text=c2)
+c2_title <- as.data.frame(c2_title)
 
 
-msnbc_title_TRUMP <- msnbc_title[(grepl("Trump",msnbc_title$text)),]
+c2.msnbc_title_TRUMP <- c2_title[(grepl("Trump",c2_title$text)),]
 
-sent_Trump_msnbc <-sentiment_by(msnbc_title_TRUMP$text)
-mean(sent_Trump_msnbc$ave_sentiment)
+c2.sent_Trump_msnbc <-sentiment_by(c2.msnbc_title_TRUMP$text)
+mean(c2.sent_Trump_msnbc$ave_sentiment)
 
-msnbc_title_TRUMP$text%>%
+c2.msnbc_title_TRUMP$text%>%
   extract_sentiment_terms()
 
 
-msnbc_Trump_bigrams <-msnbc_title_TRUMP%>%
+c2.msnbc_Trump_bigrams <-c2.msnbc_title_TRUMP%>%
   unnest_tokens(bigram, text, token="ngrams", n=2)
 
-msnbc_Trump_bigrams2 <- msnbc_Trump_bigrams[(grepl("trump",msnbc_Trump_bigrams$bigram)),]
+c2.msnbc_Trump_bigrams2 <- c2.msnbc_Trump_bigrams[(grepl("trump",c2.msnbc_Trump_bigrams$bigram)),]
 
-msnbc_Trump_bigrams2 %>%
+c2.msnbc_Trump_bigrams2 %>%
   count(bigram, sort=TRUE)%>%
   separate(bigram, c("word1", "word2"), sep= " ")%>%
   filter(!word1 %in% stop_words$word)%>%
