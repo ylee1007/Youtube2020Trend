@@ -299,21 +299,21 @@ server <- function(input, output) {
   output$overallPlot1 <- renderPlot({ 
     cluster <- switch(input$pressName, 
                        "Fox" = fox.cluster.1,
-                       "MSNBC" = msnbc.cluster.3
+                       "MSNBC" = msnbc.cluster.1
     )
     wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
   })
   output$overallPlot2 <- renderPlot({ 
     cluster <- switch(input$pressName, 
                       "Fox" = fox.cluster.2,
-                      "MSNBC" = msnbc.cluster.1
+                      "MSNBC" = msnbc.cluster.2
     )
     wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
   })
   output$overallPlot3 <- renderPlot({ 
     cluster <- switch(input$pressName, 
                       "Fox" = fox.cluster.3,
-                      "MSNBC" = msnbc.cluster.2
+                      "MSNBC" = msnbc.cluster.3
     )
     wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
   })
@@ -363,5 +363,57 @@ server <- function(input, output) {
   })
   output$model <- renderPlot({ 
     plot(cv.lasso)
+  })
+  output$cluster1Size <- renderValueBox({
+    press <- switch(paste0(input$pressName), 
+                  "Fox" = fox.cluster.1,
+                  "MSNBC" = msnbc.cluster.1)
+    valueBox(
+      paste0(length(press)), "Cluster 1 Size", icon = icon("layer-group"),
+      color = "red"
+    )
+  })
+  output$cluster2Size <- renderValueBox({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.2,
+                    "MSNBC" = msnbc.cluster.2)
+    valueBox(
+      paste0(length(press)), "Cluster 2 Size", icon = icon("layer-group"),
+      color = "orange"
+    )
+  })
+  output$cluster3Size <- renderValueBox({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.3,
+                    "MSNBC" = msnbc.cluster.3)
+    valueBox(
+      paste0(length(press)), "Cluster 3 Size", icon = icon("layer-group"),
+      color = "green"
+    )
+  })
+  output$cluster4Size <- renderValueBox({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.4,
+                    "MSNBC" = msnbc.cluster.4)
+    valueBox(
+      paste0(length(press)), "Cluster 4 Size", icon = icon("layer-group"),
+      color = "blue"
+    )
+  })
+  output$cluster5Size <- renderValueBox({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.5,
+                    "MSNBC" = msnbc.cluster.5)
+    valueBox(
+      paste0(length(press)), "Cluster 5 Size", icon = icon("layer-group"),
+      color = "purple"
+    )
+  })
+  output$bigramPlot1 <- renderPlot({ 
+    cluster <- switch(input$pressName, 
+                      "Fox" = fox.cluster.1,
+                      "MSNBC" = msnbc.cluster.1
+    )
+    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
   })
 }
