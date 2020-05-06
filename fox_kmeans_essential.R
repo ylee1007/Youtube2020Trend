@@ -73,7 +73,41 @@ wordcloud(fox.cluster.5, max.words = 100, min.freq = 3, random.order = FALSE, ro
 ################3
 
 
-####################### only cluster 2 and 3 includes Trump #######################
+####################### only cluster 2, 3, and 4 includes Trump #######################
+draw_Cluster_Bigram <- function(num_Clust, press){
+  fox.c <- press[[num_Clust]]
+  fox.c_title <- as.character(fox.c)
+  fox.c_title <- tibble(line= 1:length(fox.c), text=fox.c)
+  fox.c_title <- as.data.frame(fox.c_title)
+  
+  c.fox_title_TRUMP <- fox.c_title[(grepl("Trump",fox.c_title$text)),]
+  
+  if(nrow(c.fox_title_TRUMP) > 4) {
+    c.fox_Trump_bigrams <-c.fox_title_TRUMP%>%
+      unnest_tokens(bigram, text, token="ngrams", n=2)
+    
+    c.fox_Trump_bigrams2 <- c.fox_Trump_bigrams[(grepl("trump",c.fox_Trump_bigrams$bigram)),]
+    
+    plot <- (c.fox_Trump_bigrams2 %>%
+               count(bigram, sort=TRUE)%>%
+               separate(bigram, c("word1", "word2"), sep= " ")%>%
+               filter(!word1 %in% stop_words$word)%>%
+               filter(!word2 %in% stop_words$word)%>%
+               unite(bigram, word1,word2, sep = " ")%>%
+               filter(n>4 & n<22)%>%
+               mutate(word=reorder(bigram,n))%>%
+               ggplot(aes(x=word, y=n))+
+               geom_col()+
+               xlab(NULL)+
+               coord_flip()+
+               geom_text(aes(label=n), hjust=-0.3))
+    return(print(plot))
+  } else {
+    plot.new()
+    return(textbox(c(0,1), 1, textlist = "no 'Trump' word in the title",  border="red"))
+    
+  }
+}
 
 for(i in 1:5){
   fox.c <- fox.cluster[[i]]
@@ -88,6 +122,8 @@ for(i in 1:5){
       unnest_tokens(bigram, text, token="ngrams", n=2)
     
     c.fox_Trump_bigrams2 <- c.fox_Trump_bigrams[(grepl("trump",c.fox_Trump_bigrams$bigram)),]
+    
+    plot = paste0("plot.",i)
     
     plot <- (c.fox_Trump_bigrams2 %>%
                count(bigram, sort=TRUE)%>%

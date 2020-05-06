@@ -145,11 +145,11 @@ body <- dashboardBody(
                  title = "Bigram (Trump)", width = NULL,
                  # The id lets us use input$tabset1 on the server to find the current tab
                  id = "tabset1",
-                 tabPanel("Cluster 1", plotOutput("bigramPlot1"))
-                 #tabPanel("Cluster 2", plotOutput("overallPlot2")),
-                 #tabPanel("Cluster 3", plotOutput("overallPlot3")),
-                 #tabPanel("Cluster 4", plotOutput("overallPlot4")),
-                 #tabPanel("Cluster 5", plotOutput("overallPlot5"))
+                 tabPanel("Cluster 1", plotOutput("bigramPlot1"), htmlOutput("title1")),
+                 tabPanel("Cluster 2", plotOutput("bigramPlot2"), htmlOutput("title2")),
+                 tabPanel("Cluster 3", plotOutput("bigramPlot3"), htmlOutput("title3")),
+                 tabPanel("Cluster 4", plotOutput("bigramPlot4"), htmlOutput("title4")),
+                 tabPanel("Cluster 5", plotOutput("bigramPlot5"), htmlOutput("title5"))
                )
         )
       )

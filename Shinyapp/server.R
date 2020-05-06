@@ -151,7 +151,7 @@ fox_d1 <- dist(fox_tf_idf, method = "cosine")
 # 4. heirachical clustering 
 fox_cluster1 <- hclust(fox_d1, method = "ward.D")
 
-# split into 10 clusters
+# split into 5 clusters
 fox_groups1 <- cutree(fox_cluster1, 5)
 
 fox.cluster.1 <- fox_title$text[fox_groups1 == 1 ]
@@ -257,6 +257,56 @@ library(glmnet)
 # Find the best lambda using cross-validation
 set.seed(123) 
 cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "binomial")
+######################################################################################################
+####function to draw bigram
+fox.cluster <- list(fox.cluster.1, fox.cluster.2, fox.cluster.3, fox.cluster.4, fox.cluster.5)
+msnbc.cluster <- list(msnbc.cluster.1, msnbc.cluster.2, msnbc.cluster.3,msnbc.cluster.4,msnbc.cluster.5)
+
+draw_Cluster_Bigram <- function(num_Clust, press){
+  news.c <- press[[num_Clust]]
+  news.c_title <- as.character(news.c)
+  news.c_title <- tibble(line= 1:length(news.c), text=news.c)
+  news.c_title <- as.data.frame(news.c_title)
+  
+  c.news_title_TRUMP <- news.c_title[(grepl("Trump",news.c_title$text)),]
+  
+  if(nrow(c.news_title_TRUMP) > 4) {
+    c.news_Trump_bigrams <-c.news_title_TRUMP%>%
+      unnest_tokens(bigram, text, token="ngrams", n=2)
+    
+    c.news_Trump_bigrams2 <- c.news_Trump_bigrams[(grepl("trump",c.news_Trump_bigrams$bigram)),]
+    
+    plot <- (c.news_Trump_bigrams2 %>%
+               count(bigram, sort=TRUE)%>%
+               separate(bigram, c("word1", "word2"), sep= " ")%>%
+               filter(!word1 %in% stop_words$word)%>%
+               filter(!word2 %in% stop_words$word)%>%
+               unite(bigram, word1,word2, sep = " ")%>%
+               filter(n>4 & n<22)%>%
+               mutate(word=reorder(bigram,n))%>%
+               ggplot(aes(x=word, y=n))+
+               geom_col()+
+               xlab(NULL)+
+               coord_flip()+
+               geom_text(aes(label=n), hjust=-0.3))
+    return(print(plot))
+  } else {
+    plot.new()
+    return(textbox(c(0,1), 1, textlist = "no 'Trump' word in the title of this cluster",  border="red"))
+  }
+}
+random_title <- function(cluster){
+  c.sample <- sample(x = cluster, size = 5, replace = FALSE)
+  c.sample <- sample(x = cluster, size = 5, replace = FALSE)
+  #paste(c.sample[1], c.sample[2],c.sample[3],c.sample[4],c.sample[5], sep="\n")
+  #paste(c.sample, sep="\n")
+  return(c.sample)
+  #return(print(c.sample))
+  #c.sample <- paste(c.sample,"\n", sep="")
+  #return(c.sample)
+  #return(cat(c.sample, sep = "\n"))
+  #return(cat("5 Random title from the cluster: ", c.sample, sep = "\n"))
+}
 ######################################################################################################
 server <- function(input, output) {
   output$selected_var <- renderText({ # test ouput code
@@ -409,11 +459,74 @@ server <- function(input, output) {
       color = "purple"
     )
   })
-  output$bigramPlot1 <- renderPlot({ 
-    cluster <- switch(input$pressName, 
-                      "Fox" = fox.cluster.1,
-                      "MSNBC" = msnbc.cluster.1
-    )
-    wordcloud(cluster, max.words = 100, min.freq = 3, random.order = FALSE, rot.per = 0.1, colors = brewer.pal(8, "Dark2"))
+  
+  output$bigramPlot1 <- renderPlot({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster,
+                    "MSNBC" = msnbc.cluster)
+    draw_Cluster_Bigram(1, press)
+  })
+  output$bigramPlot2 <- renderPlot({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster,
+                    "MSNBC" = msnbc.cluster)
+    draw_Cluster_Bigram(2, press)
+  })
+  output$bigramPlot3 <- renderPlot({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster,
+                    "MSNBC" = msnbc.cluster)
+    draw_Cluster_Bigram(3, press)
+  })
+  output$bigramPlot4 <- renderPlot({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster,
+                    "MSNBC" = msnbc.cluster)
+    draw_Cluster_Bigram(4, press)
+  })
+  output$bigramPlot5 <- renderPlot({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster,
+                    "MSNBC" = msnbc.cluster)
+    draw_Cluster_Bigram(5, press)
+  })
+  output$title1 <- renderUI({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.1,
+                    "MSNBC" = msnbc.cluster.1)
+    title<- random_title(press)
+    #paste(title[1],title[2],title[3],title[4],title[5], sep="\n")
+    HTML(paste("<h3>5 Random titles from the cluster:</h3>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+  })
+  output$title2 <- renderUI({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.2,
+                    "MSNBC" = msnbc.cluster.2)
+    title<-random_title(press)
+    HTML(paste("<h4>5 Random titles from the cluster:</h4>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+  })
+  output$title3 <- renderUI({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.3,
+                    "MSNBC" = msnbc.cluster.3)
+    #HTML(random_title(press), sep="<br/>")
+    title<-random_title(press)
+    HTML(paste("<h2>5 Random titles from the cluster:</h2>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+  })
+  output$title4 <- renderUI({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.4,
+                    "MSNBC" = msnbc.cluster.4)
+    #random_title(press)
+    title<-random_title(press)
+    HTML(paste("<b>5 Random titles from the cluster:</b>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+  })
+  output$title5 <- renderUI({
+    press <- switch(paste0(input$pressName), 
+                    "Fox" = fox.cluster.5,
+                    "MSNBC" = msnbc.cluster.5)
+    #random_title(press)
+    title<-random_title(press)
+    HTML(paste("<b>5 Random titles from the cluster:</b>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
   })
 }
