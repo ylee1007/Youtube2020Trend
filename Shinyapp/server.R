@@ -36,6 +36,7 @@ Jan_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Jan_fox_words$word ,ignore.ca
 Jan_fox_words$word <-gsub("[[:punct:]]", "", Jan_fox_words$word )
 Jan_fox_words$word<-gsub("fox", "", Jan_fox_words$word)
 Jan_fox_words$word<-gsub("trumps", "trump", Jan_fox_words$word, ignore.case=TRUE)
+Jan_fox_words$word<-removeNumbers(Jan_fox_words$word, ucp = FALSE)
 
 Feb_fox_title <-as.character(Feb_fox$Title)
 Feb_fox_title <- tibble(line= 1:468, text=Feb_fox_title)
@@ -46,6 +47,7 @@ Feb_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Feb_fox_words$word ,ignore.ca
 Feb_fox_words$word <-gsub("[[:punct:]]", "", Feb_fox_words$word )
 Feb_fox_words$word<-gsub("fox", "", Feb_fox_words$word)
 Feb_fox_words$word<-gsub("trumps", "trump", Feb_fox_words$word, ignore.case=TRUE)
+Feb_fox_words$word<-removeNumbers(Feb_fox_words$word, ucp = FALSE)
 
 Mar_fox_title <-as.character(Mar_fox$Title)
 Mar_fox_title <- tibble(line= 1:582, text=Mar_fox_title)
@@ -56,6 +58,7 @@ Mar_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Mar_fox_words$word ,ignore.ca
 Mar_fox_words$word <-gsub("[[:punct:]]", "", Mar_fox_words$word )
 Mar_fox_words$word<-gsub("fox", "", Mar_fox_words$word)
 Mar_fox_words$word<-gsub("trumps", "trump", Mar_fox_words$word, ignore.case=TRUE)
+Mar_fox_words$word<-removeNumbers(Mar_fox_words$word, ucp = FALSE)
 
 Apr_fox_title <-as.character(Apr_fox$Title)
 Apr_fox_title <- tibble(line= 1:254, text=Apr_fox_title)
@@ -63,11 +66,14 @@ Apr_fox_words <- Apr_fox_title %>%
   unnest_tokens(word, text)%>%
   anti_join(stop_words)
 Apr_fox_words$word <-gsub("[^0-9A-Za-z///' ]","" , Apr_fox_words$word ,ignore.case = TRUE)
+#Apr_fox_words$word <-gsub("[0-9]+", "", Apr_fox_words$word)
+Apr_fox_words$word<-removeNumbers(Apr_fox_words$word, ucp = FALSE)
 Apr_fox_words$word <-gsub("[[:punct:]]", "", Apr_fox_words$word )
-#Apr_fox_words$word <-gsub('[[:digit:]]+',"", Apr_fox_words$word )
+#Apr_fox_words$word <-gsub("[[:digit:]]+","", Apr_fox_words$word )
 Apr_fox_words$word<-gsub("fox", "", Apr_fox_words$word)
 Apr_fox_words$word<-gsub("trumps", "trump", Apr_fox_words$word, ignore.case=TRUE)
-##############################################
+#Apr_fox_words$word<-gsub(" ", "", Apr_fox_words$word, fixed = TRUE)
+################################################################
 msnbc <- read_excel("../msnbc_data.xlsx")
 msnbc <- msnbc%>%
   select("TitleRemoved","Date" )
@@ -89,6 +95,7 @@ Jan_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Jan_msnbc_words$word ,ignor
 Jan_msnbc_words$word <-gsub("[[:punct:]]", "", Jan_msnbc_words$word )
 Jan_msnbc_words$word<-gsub("msnbc", "", Jan_msnbc_words$word)
 Jan_msnbc_words$word<-gsub("trumps", "trump", Jan_msnbc_words$word, ignore.case=TRUE)
+Jan_msnbc_words$word<-removeNumbers(Jan_msnbc_words$word, ucp = FALSE)
 
 Feb_msnbc_title <-as.character(Feb_msnbc$TitleRemoved)
 Feb_msnbc_title <- tibble(line= 1:718, text=Feb_msnbc_title)
@@ -99,6 +106,7 @@ Feb_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Feb_msnbc_words$word ,ignor
 Feb_msnbc_words$word <-gsub("[[:punct:]]", "", Feb_msnbc_words$word )
 Feb_msnbc_words$word<-gsub("msnbc", "", Feb_msnbc_words$word)
 Feb_msnbc_words$word<-gsub("trumps", "trump", Feb_msnbc_words$word, ignore.case=TRUE)
+Feb_msnbc_words$word<-removeNumbers(Feb_msnbc_words$word, ucp = FALSE)
 
 Mar_msnbc_title <-as.character(Mar_msnbc$TitleRemoved)
 Mar_msnbc_title <- tibble(line= 1:936, text=Mar_msnbc_title)
@@ -109,6 +117,7 @@ Mar_msnbc_words$word <-gsub("[^0-9A-Za-z///' ]","" , Mar_msnbc_words$word ,ignor
 Mar_msnbc_words$word <-gsub("[[:punct:]]", "", Mar_msnbc_words$word )
 Mar_msnbc_words$word<-gsub("msnbc", "", Mar_msnbc_words$word)
 Mar_msnbc_words$word<-gsub("trumps", "trump", Mar_msnbc_words$word, ignore.case=TRUE)
+Mar_msnbc_words$word<-removeNumbers(Mar_msnbc_words$word, ucp = FALSE)
 
 Apr_msnbc_title <-as.character(Apr_msnbc$TitleRemoved)
 Apr_msnbc_title <- tibble(line= 1:439, text=Apr_msnbc_title)
@@ -120,6 +129,7 @@ Apr_msnbc_words$word <-gsub("[[:punct:]]", "", Apr_msnbc_words$word )
 Apr_msnbc_words$word<-gsub("msnbc", "", Apr_msnbc_words$word)
 #Apr_words$word <-gsub('[[:digit:]]',"", Apr_words$word )
 Apr_msnbc_words$word<-gsub("trumps", "trump", Apr_msnbc_words$word, ignore.case=TRUE)
+Apr_msnbc_words$word<-removeNumbers(Apr_msnbc_words$word, ucp = FALSE)
 ######################################################################################################
 ######연아######
 fox <- read_excel("../fox_data_removedduplicates.xlsx")
@@ -336,7 +346,7 @@ server <- function(input, output) {
                   "FebMSNBC" = 37,
                   "MarMSNBC" = 35,
                   "AprMSNBC" = 20)
-    variable %>%
+    variable %>% filter(word != "") %>%
       count(word, sort=TRUE)%>%
       filter(n>num)%>%
       mutate(word=reorder(word, n))%>%
