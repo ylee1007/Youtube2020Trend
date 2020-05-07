@@ -2,18 +2,18 @@ library(shinydashboard)
 library(ggvis)
 
 header <- dashboardHeader(
-  title = "2020 Youtube News Trend", titleWidth = 300
+  title = "Trump on Youtube: an analysis of the title in major news Youtube channels", titleWidth = 700
 )
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
     # Setting id makes input$tabs give the tabName of currently-selected tab
     id = "tabs",
-    menuItem("Fox vs. Trump", tabName = "main", icon = icon("far fa-newspaper"),
-             menuSubItem('Analyze', tabName = "mainAnalyze", icon = icon('fas fa-chart-line')),
+    menuItem("Fox vs. MSNBC", tabName = "main", icon = icon("far fa-newspaper"),
+             menuSubItem('Analysis', tabName = "mainAnalysis", icon = icon('fas fa-chart-line')),
              menuSubItem('Model', tabName = "model", icon = icon("bar-chart-o"))
              ),
-    menuItem("Monthly Analyze", tabName = "monthly", icon = icon("bar-chart-o")
+    menuItem("Monthly Analysis", tabName = "monthly", icon = icon("bar-chart-o")
     )
   )
 )
@@ -56,16 +56,16 @@ body <- dashboardBody(
         )
       )
     ),
-    tabItem(tabName = "mainAnalyze",
+    tabItem(tabName = "mainAnalysis",
             fluidRow(
               column(width = 12,
                      fluidRow(
                        column(width = 6,
-                              box(title = 'Fox bigram (Trump)', status = "warning", width = NULL, solidHeader = TRUE, height = 460,
+                              box(title = 'Trump Bigram on Fox', status = "warning", width = NULL, solidHeader = TRUE, height = 460,
                                   plotOutput("trumpFox")
                               )),
                        column(width = 6,
-                              box(title = 'MSNBC bigram (Trump)', status = "warning", width = NULL, solidHeader = TRUE, height = 460,
+                              box(title = 'Trump Bigram on MSNBC', status = "warning", width = NULL, solidHeader = TRUE, height = 460,
                                   plotOutput("trumpMsnbc")
                               ))
                      )
@@ -142,7 +142,7 @@ body <- dashboardBody(
         ),
         column(width =6,
                tabBox(
-                 title = "Bigram (Trump)", width = NULL,
+                 title = "Trump Bigram", width = NULL,
                  # The id lets us use input$tabset1 on the server to find the current tab
                  id = "tabset1",
                  tabPanel("Cluster 1", plotOutput("bigramPlot1"), htmlOutput("title1")),
@@ -157,7 +157,7 @@ body <- dashboardBody(
     tabItem(tabName = "model",
       fluidRow(
         column(width = 12,
-               box(title = 'Model', width = NULL, status = "warning", solidHeader = TRUE, height = 460,
+               box(title = 'Penalized Logistic Regression Model', width = NULL, status = "warning", solidHeader = TRUE, height = 460,
                    plotOutput("model")
                )
         )
