@@ -12,7 +12,7 @@ library(wordcloud)
 
 library(glmnet)
 library(caret)
-
+library(plotrix)
 ######################################### cluster analyze by month#######################################
 fox <- read_excel("../fox_data_removedduplicates.xlsx")
 fox <- fox%>%
@@ -172,21 +172,27 @@ fox.cluster.4 <- fox_title$text[fox_groups1 == 4 ]
 fox.cluster.5 <- fox_title$text[fox_groups1 == 5 ]
 
 # MSNBC data
-
+library(textclean)
 msnbcData<-read_excel("../msnbc_data.xlsx")
 doc <-  msnbcData[,5]
 doc$TitleRemoved <-gsub("[[:punct:]]", "", doc$TitleRemoved)
 doc$TitleRemoved <-gsub("Will", "", doc$TitleRemoved)
 doc$TitleRemoved <-gsub("[^0-9A-Za-z///' ]","", doc$TitleRemoved,ignore.case = TRUE)
 doc$TitleRemoved <-gsub("Trumps", "Trump", doc$TitleRemoved, ignore.case = TRUE)
-msnbcDf <- as.data.frame(msnbcData)
-msnbc <- msnbcDf %>% select("TitleRemoved")
+doc$TitleRemoved <-gsub("admin", "administration", doc$TitleRemoved, ignore.case = TRUE)
+#msnbcDf <- as.data.frame(msnbcData)
+#msnbc <- msnbcDf %>% select("TitleRemoved")
 #msnbc$Title <- as.character(msnbc$TitleRemoved)
 #title<-msnbc$Title
-title2<-as.vector(msnbc)
+title2<-as.vector(doc$TitleRemoved)	
+title2 <- as.data.frame(title2)
 
-msnbc_title <- tibble(line = 1:2759, text = title2$TitleRemoved)
+msnbc_title <- tibble(line = 1:2759, text = title2$title2)
 msnbc_title <- as.data.frame(msnbc_title)
+msnbc_title_TRUMP <- msnbc_title[(grepl("Trump",msnbc_title$text)),]	
+msnbc_Trump_bigrams <-msnbc_title_TRUMP%>%	
+  unnest_tokens(bigram, text, token="ngrams", n=2)	
+msnbc_Trump_bigrams2 <- msnbc_Trump_bigrams[(grepl("trump",msnbc_Trump_bigrams$bigram)),]
 
 TFIDF <- function(vector) {
   # tf 
@@ -240,32 +246,23 @@ msnbc_Trump_bigrams2 <- msnbc_Trump_bigrams[(grepl("trump",msnbc_Trump_bigrams$b
 
 ######################################################################################################
 ##model
-fox_msnbc_matrix <- read.csv("../fox_msnbc_matrix_revised.csv")
+trump <- read_excel("../Final.model.data.xlsx")
+trump$press.type <-ifelse(trump$PRESS == "FOX", "1", "0")
+trump <- trump[,-c(1:2)]
+trump$press
 
-summary(fox_msnbc_matrix$View)
-#plot(density(fox_msnbc_matrix$View))
-#hist(fox_msnbc_matrix$View, breaks=100, col="red")
-fox_msnbc_matrix$view.logic <- ifelse(fox_msnbc_matrix$View >= 250000, "large", "small")
-fox_msnbc_matrix <- fox_msnbc_matrix[,-1]
-#msnbc_matrix <- msnbc_matrix[,-2]
-
-
-#preparing the data
 set.seed(12345)
-training.samples <- fox_msnbc_matrix$view.logic%>%
-  createDataPartition(p=0.8, list=FALSE )
-train.data <- fox_msnbc_matrix[training.samples,]
-test.data <- fox_msnbc_matrix[-training.samples,]
-
+training.samples <- trump$press.type%>%
+  createDataPartition(p=0.8, list=FALSE)
+train.data <- trump[training.samples,]
+test.data  <- trump[-training.samples,]
 
 # Dumy code categorical predictor variables
-x <- model.matrix(view.logic~., train.data, na.omit=TRUE)[,-1]
+x <- model.matrix(press.type~., train.data, na.omit=TRUE)[,-1]
 # Convert the outcome (class) to a numerical variable
-y <- ifelse(train.data$view.logic =="large", 1, 0)
-
-library(glmnet)
+y <- ifelse(train.data$press.type =="1", 1, 0)
 # Find the best lambda using cross-validation
-set.seed(123) 
+set.seed(12345) 
 cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "binomial")
 ######################################################################################################
 ####function to draw bigram
@@ -513,7 +510,7 @@ server <- function(input, output) {
                     "Fox" = fox.cluster.2,
                     "MSNBC" = msnbc.cluster.2)
     title<-random_title(press)
-    HTML(paste("<h4>5 Random titles from the cluster:</h4>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+    HTML(paste("<h3>5 Random titles from the cluster:</h3>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
   })
   output$title3 <- renderUI({
     press <- switch(paste0(input$pressName), 
@@ -521,7 +518,7 @@ server <- function(input, output) {
                     "MSNBC" = msnbc.cluster.3)
     #HTML(random_title(press), sep="<br/>")
     title<-random_title(press)
-    HTML(paste("<h2>5 Random titles from the cluster:</h2>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+    HTML(paste("<h3>5 Random titles from the cluster:</h3>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
   })
   output$title4 <- renderUI({
     press <- switch(paste0(input$pressName), 
@@ -529,7 +526,7 @@ server <- function(input, output) {
                     "MSNBC" = msnbc.cluster.4)
     #random_title(press)
     title<-random_title(press)
-    HTML(paste("<b>5 Random titles from the cluster:</b>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+    HTML(paste("<h3>5 Random titles from the cluster:</h3>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
   })
   output$title5 <- renderUI({
     press <- switch(paste0(input$pressName), 
@@ -537,6 +534,6 @@ server <- function(input, output) {
                     "MSNBC" = msnbc.cluster.5)
     #random_title(press)
     title<-random_title(press)
-    HTML(paste("<b>5 Random titles from the cluster:</b>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
+    HTML(paste("<h3>5 Random titles from the cluster:</h3>",title[1],title[2],title[3],title[4],title[5], sep="<br/>"))
   })
 }
